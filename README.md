@@ -12,13 +12,19 @@ additional features.
 
 ## Dependencies
 
-**StandaloneHost must be compiled with Xcode version 16.x or earlier.** Compiling with Xcode version 26.x will force Liquid Glass "compatibility" and will make the UI difficult to read when running on macOS Tahoe.
+StandaloneHost builds with Xcode 27 and requires macOS 12 or later.
 
-StandaloneHost requires LTCommon. It is available on GitHib 
-[here](https://github.com/lmt3210/LTCommon).
+It requires [LTCommon](https://github.com/brentvatne/LTCommon) and Apple's
+[CoreAudioSDK](https://github.com/nerrons/CoreAudioSDK) version 1.1, cloned
+next to this repository:
 
-StandaloneHost also requires Apple's CoreAudioSDK version 1.1. It can be
-downloaded [here](https://github.com/nerrons/CoreAudioSDK).
+```sh
+git clone https://github.com/brentvatne/StandaloneHost
+git clone https://github.com/brentvatne/LTCommon
+git clone https://github.com/nerrons/CoreAudioSDK
+cd StandaloneHost
+xcodebuild -scheme "StandaloneHost Release" -derivedDataPath build build
+```
 
 ## Contributing
 

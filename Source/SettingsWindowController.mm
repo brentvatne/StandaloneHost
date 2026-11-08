@@ -621,6 +621,19 @@
     [self.window setBackgroundColor:[NSColor colorWithSRGBRed:(61.0 / 255.0)
                                      green:(39.0 / 255.0) blue:(93.0 / 255.0)
                                      alpha:1.0]];
+
+    // With the macOS 26+ design, pop-up buttons and checkboxes draw without
+    // an opaque bezel, so their light-mode text is unreadable on the purple
+    // background. Labels use controlBackgroundColor (white only in light
+    // mode), so only buttons get the dark appearance.
+    NSAppearance *dark = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+    for (NSView *view in self.window.contentView.subviews)
+    {
+        if ([view isKindOfClass:[NSButton class]])
+        {
+            view.appearance = dark;
+        }
+    }
 }
 
 - (void)initSettings:(NSString *)appName
