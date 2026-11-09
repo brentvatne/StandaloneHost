@@ -55,5 +55,6 @@
 - (IBAction)showABoutBox:(id)sender;
 - (IBAction)checkForUpdates:(id)sender;
 - (IBAction)showDebugInfo:(id)sender;
+- (IBAction)saveState:(id)sender;
 
 @end

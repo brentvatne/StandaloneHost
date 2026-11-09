@@ -10,6 +10,12 @@ program, without starting up a DAW or other hosting app. It is essentially
 the Mac equivalent of the popular SAVIHost program for Windows with
 additional features.
 
+## Wrappers
+
+Rename a copy of StandaloneHost.app to open one synth directly: `Ctrl-E.app` loads the AU named Ctrl-E. The name can also add a label to the AU's name, so several wrappers can use one AU: `Rhodes (RdPiano).app` loads Giulio Zausa: RdPiano.
+
+In a wrapper, **Save Plugin State** (⌘S) keeps the current sound. The wrapper restores it at launch from `~/Library/Application Support/StandaloneHost/<wrapper name>.aupreset`. Delete that file to start again from the plugin's default sound.
+
 ## Dependencies
 
 StandaloneHost builds with Xcode 27 and requires macOS 12 or later.

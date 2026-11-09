@@ -97,9 +97,13 @@ typedef enum
     // For logging
     os_log_t mLog;
     NSString *mLogFile;
+
+    // Saved AU state for this app name
+    NSString *mStatePath;
 }
 
 - (synthStatus)loadSynth:(NSString *)appName;
+- (void)saveState;
 - (void)cleanup;
 - (void)showDebugInfo;
 

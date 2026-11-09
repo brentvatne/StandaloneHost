@@ -143,6 +143,15 @@
         // Update the main menu
         NSMenu *menu = [[[NSApp mainMenu] itemAtIndex:0] submenu];
         [menu setTitle:mAppName];
+
+        // Add Save Plugin State after the settings item
+        NSMenuItem *save = [[NSMenuItem alloc]
+            initWithTitle:@"Save Plugin State" action:@selector(saveState:)
+            keyEquivalent:@"s"];
+        [save setTarget:self];
+        NSInteger index = [menu indexOfItemWithTarget:self
+                           andAction:@selector(showSettingsWindow:)];
+        [menu insertItem:save atIndex:(index < 0) ? 1 : (index + 1)];
         
         // Setup the synth window
         [self launchSynth];
@@ -152,6 +161,11 @@
     [mDebugMenu setEnabled:YES];
     [mDebugMenu setHidden:NO];
 #endif
+}
+
+- (IBAction)saveState:(id)sender
+{
+    [mSynthWindow saveState];
 }
 
 - (IBAction)showDebugInfo:(id)sender

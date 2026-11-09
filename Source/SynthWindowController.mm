@@ -46,6 +46,17 @@
 #import "NSFileManager+DirectoryLocations.h"
 
 
+// An app name closely matches an AU name ("Manufacturer: Name") when either
+// contains the other, or when the app name contains the AU's own name, as in
+// "Rhodes (RdPiano)" for "Giulio Zausa: RdPiano".
+static BOOL closeMatch(NSString *appName, NSString *auName)
+{
+    NSString *name = [auName componentsSeparatedByString:@": "].lastObject;
+    return [auName containsString:appName] ||
+           [appName containsString:auName] ||
+           (name.length > 0 && [appName containsString:name]);
+}
+
 @implementation SynthWindowController
 
 - (instancetype)init
@@ -604,8 +615,7 @@
         {
             NSString *auName = (__bridge NSString *)AUList[i].GetAUName();
 
-            if (([auName containsString:appName] == YES) ||
-                ([appName containsString:auName] == YES))
+            if (closeMatch(appName, auName))
             {
                 AudioComponentDescription desc = AUList[i].Desc();
                 mDisplayName = [auName copy];
@@ -646,8 +656,7 @@
         {
             NSString *auName = (__bridge NSString *)AUList[i].GetAUName();
 
-            if (([auName containsString:appName] == YES) ||
-                ([appName containsString:auName] == YES))
+            if (closeMatch(appName, auName))
             {
                 AudioComponentDescription desc = AUList[i].Desc();
                 mDisplayName = [auName copy];
@@ -839,6 +848,27 @@
 
     // Add AU to graph
     mSynthUnit = [mAUGraph addSynth:audesc];
+
+    // Restore the state saved with Save Plugin State, if it is for this AU
+    mStatePath = [NSString stringWithFormat:@"%@/%@.aupreset",
+        [[NSFileManager defaultManager] applicationSupportDirectory], appName];
+    NSDictionary *state =
+        [NSDictionary dictionaryWithContentsOfFile:mStatePath];
+
+    if ((state != nil) && (status == SYNTH_STATUS_FOUND) &&
+        ([state[@"type"] unsignedIntValue] == mAUType) &&
+        ([state[@"subtype"] unsignedIntValue] == mAUSubtype) &&
+        ([state[@"manufacturer"] unsignedIntValue] == mAUMfg))
+    {
+        CFPropertyListRef plist = (__bridge CFPropertyListRef)state;
+        OSStatus err = AudioUnitSetProperty(mSynthUnit,
+                                            kAudioUnitProperty_ClassInfo,
+                                            kAudioUnitScope_Global, 0,
+                                            &plist, sizeof(plist));
+        LTLog(mLog, mLogFile, OS_LOG_TYPE_INFO,
+              @"Restored state from %@, status = %i (%@)",
+              mStatePath, err, statusToString(err));
+    }
 
     // Set up the AU
     [self setAudioUnit];
@@ -1042,6 +1072,30 @@
     
         mLastRecordCount = mMIDIControl.recordCount;
     }
+}
+
+- (void)saveState
+{
+    CFPropertyListRef plist = NULL;
+    UInt32 size = sizeof(plist);
+    OSStatus err = AudioUnitGetProperty(mSynthUnit,
+                                        kAudioUnitProperty_ClassInfo,
+                                        kAudioUnitScope_Global, 0,
+                                        &plist, &size);
+
+    if (err == noErr)
+    {
+        NSDictionary *state = CFBridgingRelease(plist);
+
+        if ([state writeToFile:mStatePath atomically:YES] == NO)
+        {
+            err = writErr;
+        }
+    }
+
+    LTLog(mLog, mLogFile, OS_LOG_TYPE_INFO,
+          @"Saved state to %@, status = %i (%@)",
+          mStatePath, err, statusToString(err));
 }
 
 - (void)cleanup
